@@ -53,12 +53,14 @@ visualizer/
 
 ---
 
+Author: milord-x
+Project: Qnumber
+
+---
 ## Run
 
 ```bash
 python3 app.py
-
----
 
 Roadmap
 
@@ -67,8 +69,3 @@ v0.3 – Neural network engine
 v0.4 – Training system
 v0.5 – Inference & metrics
 v1.0 – Stable educational release
-
----
-
-Author: milord-x
-Project: Qnumber
