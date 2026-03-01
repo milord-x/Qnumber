@@ -1,0 +1,8 @@
+---
+
+# requirements.txt
+PyQt6>=6.6
+numpy>=1.26
+matplotlib>=3.8
+
+---
