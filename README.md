@@ -1,3 +1,8 @@
+![Python](https://img.shields.io/badge/Python-3.11+-blue)
+![PyQt6](https://img.shields.io/badge/PyQt6-UI-green)
+![Status](https://img.shields.io/badge/Status-v0.1.0-orange)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+
 # Qnumber
 
 Qnumber is an educational desktop application for demonstrating neural network training and inference using custom 32×32 images.
