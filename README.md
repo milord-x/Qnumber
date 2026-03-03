@@ -5,72 +5,120 @@
 
 # Qnumber
 
-Qnumber is an educational desktop application for demonstrating neural network training and inference using custom 32×32 images.
+![Home Screen](assets/home_screen.png)
 
-Current version: v0.1.0  
-Status: Home Screen implemented (UI skeleton)
+Qnumber is a desktop machine learning laboratory built with Python and PyQt6.  
+It is designed for controlled neural network experimentation using 32×32 digit datasets.
 
----
-
-## Purpose
-
-Qnumber is designed to:
-- Demonstrate neural network mechanics from scratch
-- Provide full control over dataset generation
-- Visualize forward propagation
-- Evaluate model performance professionally
-
-This project avoids external ML frameworks and focuses on clarity and architecture.
+This project focuses on understanding how architecture, parameters, and dataset quality directly affect model behavior.
 
 ---
 
-## Tech Stack
+## Overview
+
+Qnumber is not a wrapper over large ML frameworks.  
+It is a structured educational environment where every component is transparent and controllable.
+
+The application allows:
+
+- Managing structured digit datasets (train / test)
+- Sorting and inspecting images
+- Safe bulk deletion with confirmation
+- Controlled neural network configuration
+- Visual experimentation with model behavior
+
+The goal is clarity over abstraction.
+
+---
+
+## Dataset Architecture
+
+The dataset follows a deterministic structure:
+dataset/
+train/
+0/
+1/
+...
+9/
+test/
+0/
+1/
+...
+9/
+
+
+Training images format:
+digit_index.png
+Example:
+0_00000.png
+1_00042.png
+
+## Technical Stack
 
 - Python 3.11+
 - PyQt6
 - NumPy
-- Matplotlib
+- Pillow
 
----
-
-## Current Implementation (v0.1.0)
-
-Implemented:
-- Main Window
-- Home Screen
-- Navigation skeleton
-
-Not implemented:
-- Dataset system
-- Neural network engine
-- Training system
-- Inference system
-- Metrics and visualization
-
----
-
-## Planned Architecture
-
+The UI is built with a modular architecture:
+ui/
 engine/
 storage/
-ui/
-visualizer/
+assets/
+
+Each module has a strict responsibility.
 
 ---
 
-Author: milord-x
-Project: Qnumber
+## Installation
 
----
-## Run
+Clone the repository:
 
 ```bash
-python3 app.py
+git clone https://github.com/milord-x/Qnumber.git
+cd Qnumber
 
-Roadmap
+Create virtual environment (Fish shell):
+python -m venv .venv
+source .venv/bin/activate.fish
+pip install -r requirements.txt
+```
+Run:
+```
+python app.py
+```
+---
 
-v0.2 – Dataset system
-v0.3 – Neural network engine
-v0.4 – Training system
-v0.5 – Inference & metrics
-v1.0 – Stable educational release
+## Design Philosophy
+
+Qnumber is built on three principles:
+
+Deterministic structure
+
+Minimal abstraction
+
+Full experimental control
+
+Neural networks should be observed, not mystified.
+
+## Project Status
+
+Current version includes:
+
+Fully implemented Dataset screen
+
+Sorting (Asc / Desc)
+
+Delete-all with train/test selection
+
+Stable background rendering
+
+OLED-style UI refinement
+
+Next stages include:
+
+Draw module
+
+Generate module
+
+Real-time visualization
