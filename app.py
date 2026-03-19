@@ -1,8 +1,5 @@
 import sys
-from pathlib import Path
-import os
 
-os.chdir(Path(__file__).resolve().parent)
 from PyQt6.QtWidgets import QApplication
 from ui.main_window import MainWindow
 

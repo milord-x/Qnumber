@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Callable
-from PyQt6.QtGui import QPixmap
 from ui.pages.draw_page import DrawPage
 from ui.pages.generate_page import GeneratePage
 
@@ -176,81 +175,66 @@ class _ReindexDatasetTask(QRunnable):
         self.dataset_dir = dataset_dir
         self.emitter = emitter
 
-    @staticmethod
-    def _is_valid_name(name: str) -> bool:
-        return bool(
-            re.match(r"^[0-9]_[0-9]{5}\.png$", name, re.IGNORECASE)
-            or re.match(r"^[0-9]{5}\.png$", name, re.IGNORECASE)
-        )
-
     def run(self) -> None:
         try:
             rx_train = re.compile(r"^([0-9])_([0-9]{5})\.png$", re.IGNORECASE)
             rx_plain = re.compile(r"^([0-9]{5})\.png$", re.IGNORECASE)
-    
+
             for split in ("train", "test"):
                 split_dir = self.dataset_dir / split
                 if not split_dir.exists():
                     continue
-    
-                items: list[tuple[int, int, str]] = []
-                for d in range(10):
-                    digit_dir = split_dir / str(d)
-                    if not digit_dir.exists():
+
+                items: list[tuple[int, int, Path]] = []
+
+                if split == "train":
+                    search_dirs = [split_dir / str(d) for d in range(10)]
+                else:
+                    search_dirs = [split_dir, *[split_dir / str(d) for d in range(10)]]
+
+                for base_dir in search_dirs:
+                    if not base_dir.exists():
                         continue
-    
-                    with os.scandir(digit_dir) as it:
+
+                    with os.scandir(base_dir) as it:
                         for e in it:
-                            if not e.is_file():
+                            if not e.is_file() or not e.name.lower().endswith(".png"):
                                 continue
-                            if not e.name.lower().endswith(".png"):
-                                continue
-    
-                            name = e.name
-                            idx: Optional[int] = None
-    
-                            m_train = rx_train.match(name)
-                            if m_train:
-                                idx = int(m_train.group(2))
+
+                            match = rx_train.match(e.name)
+                            if match:
+                                digit = int(match.group(1))
+                                idx = int(match.group(2))
                             else:
-                                m_plain = rx_plain.match(name)
-                                if m_plain:
-                                    idx = int(m_plain.group(1))
-    
-                            if idx is None:
-                                continue
-    
-                            items.append((d, idx, name))
-    
+                                plain = rx_plain.match(e.name)
+                                if plain is None:
+                                    continue
+                                idx = int(plain.group(1))
+                                digit = int(base_dir.name) if base_dir != split_dir and base_dir.name.isdigit() else -1
+
+                            items.append((digit, idx, Path(base_dir) / e.name))
+
                 if not items:
                     continue
-    
-                items.sort(key=lambda t: (t[0], t[1], t[2]))
-    
+
+                items.sort(key=lambda item: (item[0], item[1], item[2].name))
                 tag = uuid.uuid4().hex[:10]
-    
-                temp: list[tuple[int, str]] = []
-                for i, (d, _, name) in enumerate(items):
-                    digit_dir = split_dir / str(d)
-                    old_p = digit_dir / name
-                    tmp_name = f"__tmp__{tag}__{i:06d}.png"
-                    old_p.rename(digit_dir / tmp_name)
-                    temp.append((d, tmp_name))
-    
-                for global_i, (d, tmp_name) in enumerate(temp):
-                    digit_dir = split_dir / str(d)
-    
+
+                temp: list[Path] = []
+                for i, (_, _, path) in enumerate(items):
+                    tmp_path = path.with_name(f"__tmp__{tag}__{i:06d}.png")
+                    path.rename(tmp_path)
+                    temp.append(tmp_path)
+
+                for global_i, tmp_path in enumerate(temp):
                     if split == "train":
-                        final_name = f"{d}_{global_i:05d}.png"
+                        digit = int(tmp_path.parent.name)
+                        final_name = f"{digit}_{global_i:05d}.png"
                     else:
                         final_name = f"{global_i:05d}.png"
-    
-                    (digit_dir / tmp_name).rename(digit_dir / final_name)
-    
-            self.emitter.finished.emit(True, "Reindex complete (global per split)")
-        except Exception as e:
-            self.emitter.finished.emit(False, f"Reindex failed: {e}")
-    
+
+                    tmp_path.rename(tmp_path.with_name(final_name))
+
             self.emitter.finished.emit(True, "Reindex complete (global per split)")
         except Exception as e:
             self.emitter.finished.emit(False, f"Reindex failed: {e}")
@@ -298,6 +282,17 @@ class GalleryModel(QAbstractListModel):
             split_dir = self.dataset_dir / split
             if not split_dir.exists():
                 continue
+
+            if split == "test":
+                for p in split_dir.glob("*.png"):
+                    idx = _parse_index(p.name)
+                    if idx is None:
+                        continue
+                    try:
+                        mt = p.stat().st_mtime
+                    except Exception:
+                        mt = 0.0
+                    items.append(GalleryItem(path=p, digit=-1, split=split, index=idx, mtime=mt))
 
             for d in range(10):
                 digit_dir = split_dir / str(d)
