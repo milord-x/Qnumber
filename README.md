@@ -86,22 +86,33 @@ Clone the repository:
 ```bash
 git clone https://github.com/milord-x/Qnumber.git
 cd Qnumber
+```
 
-Create a virtual environment:
+Create and activate a virtual environment.
 
-Bash / Zsh
+Bash or Zsh:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
 
-Fish
+Fish:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate.fish
+```
 
 Install dependencies:
 
+```bash
 pip install -r requirements.txt
+```
 
 Run the application:
+
+```bash
 python3 app.py
 ```
 
